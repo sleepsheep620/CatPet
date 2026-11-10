@@ -13,9 +13,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: macos-14        # Apple 芯片（M1/M2/M3/M4）
+          - os: macos-15        # Apple 芯片（M1/M2/M3/M4）
             arch: apple-silicon
-          - os: macos-13        # Intel 芯片
+          - os: macos-15-intel  # Intel 芯片（老款 Mac）
             arch: intel
 
     steps:
@@ -37,7 +37,6 @@ jobs:
           python -c "import tkinter; w=tkinter.Tk(); w.destroy(); print('Tk ok', tkinter.TkVersion)"
 
       - name: 打包 App
-        working-directory: catpet
         run: |
           ICON=""
           if [ -f cat.icns ]; then ICON="--icon cat.icns"; fi
@@ -45,7 +44,6 @@ jobs:
             --add-data "assets:assets" catpet.py
 
       - name: 压缩成 zip（保留结构）
-        working-directory: catpet
         run: |
           cd dist
           ditto -c -k --sequesterRsrc --keepParent CatPet.app "CatPet-${{ matrix.arch }}.zip"
@@ -54,5 +52,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: CatPet-mac-${{ matrix.arch }}
-          path: catpet/dist/CatPet-${{ matrix.arch }}.zip
+          path: dist/CatPet-${{ matrix.arch }}.zip
           if-no-files-found: error
