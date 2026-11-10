@@ -116,12 +116,12 @@ class Fish(tk.Toplevel):
         self.pet = pet
         self.overrideredirect(True)
         self.attributes("-topmost", True)
-        self.configure(bg="black")
+        self.configure(bg=_trans_bg())
         _apply_transparency(self)
 
         # 用 Canvas 画一条小鱼干，不依赖 emoji 字体
         S = 44
-        cv = tk.Canvas(self, width=S, height=S, bg="black", highlightthickness=0)
+        cv = tk.Canvas(self, width=S, height=S, bg=_trans_bg(), highlightthickness=0)
         cv.pack()
         body = "#7ec8e3"
         cv.create_oval(4, 16, 30, 32, fill=body, outline="#4a9bc4", width=2)
@@ -170,10 +170,22 @@ class Fish(tk.Toplevel):
             pass
 
 
+def _trans_bg():
+    """透明窗口该用的背景色。
+
+    macOS 的 -transparent 要求背景是带透明度的颜色（systemTransparent）；
+    Windows 用 -transparentcolor 抠掉 black；其余系统只能实色背景。
+    """
+    if sys.platform == "darwin":
+        return "systemTransparent"
+    return "black"
+
+
 def _apply_transparency(win, key="black"):
     """把窗口的指定颜色变透明。
 
-    Windows 用 -transparentcolor，macOS 用 -transparent，其余系统忽略。
+    Windows 用 -transparentcolor（key 是要抠掉的颜色），
+    macOS 用 -transparent（参数是布尔值，背景需为 systemTransparent）。
     失败也不影响运行，只是背景色会露出来。
     """
     if sys.platform == "win32":
@@ -184,7 +196,7 @@ def _apply_transparency(win, key="black"):
             return False
     if sys.platform == "darwin":
         try:
-            win.attributes("-transparent", key)
+            win.attributes("-transparent", True)
             return True
         except tk.TclError:
             return False
@@ -562,7 +574,7 @@ class CatPet:
         root.title(APP_TITLE)
         root.overrideredirect(True)
         root.attributes("-topmost", True)
-        root.configure(bg="black")
+        root.configure(bg=_trans_bg())
 
         _apply_transparency(root)
         try:
@@ -570,7 +582,7 @@ class CatPet:
         except tk.TclError:
             pass
 
-        self.label = tk.Label(root, bd=0, bg="black")
+        self.label = tk.Label(root, bd=0, bg=_trans_bg())
         self.label.pack()
 
         self._bind_events()
@@ -913,9 +925,9 @@ class CatPet:
             heart = tk.Toplevel(self.root)
             heart.overrideredirect(True)
             heart.attributes("-topmost", True)
-            heart.configure(bg="black")
+            heart.configure(bg=_trans_bg())
             _apply_transparency(heart)
-            lbl = tk.Label(heart, text="♥", fg=random.choice(HEART_COLORS), bg="black",
+            lbl = tk.Label(heart, text="♥", fg=random.choice(HEART_COLORS), bg=_trans_bg(),
                            font=(_HEART_FONT, int(random.randint(13, 20) * max(self.scale, 1))))
             lbl.pack()
             x = base_x + random.randint(-30, 30)
